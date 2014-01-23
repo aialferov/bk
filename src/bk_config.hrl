@@ -22,12 +22,12 @@
 	usage ->
 		"usage: bk <command>~n~n"
 		"Commands:~n"
-		"    sample        Create (if does not exists) and open sample file~n"
-		"    sample sum    Show sum of the sample file~n"
-		"    merge         Merge sample file with the whole data~n"
-		"    sum           Show sum of the current year and month~n"
-		"    groups        Show relations between groups and their names~n"
-		"    months        Show supported month names~n"
+		"    sample       Create (if does not exists) and open sample file~n"
+		"    sample sum   Show sum of the sample file~n"
+		"    merge        Merge sample file with the current year and month ~n"
+		"    sum          Show sum of the current year and month~n"
+		"    groups       Show relations between groups and their names~n"
+		"    months       Show supported month names~n"
 	;
 	sample_not_found -> "sample not found~n"
 end).
