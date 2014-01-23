@@ -1,0 +1,5 @@
+_bk() {
+	local cur=${COMP_WORDS[COMP_CWORD]}
+	COMPREPLY=( $(compgen -W "groups merge months sample sum" -- $cur) )
+}
+complete -F _bk bk

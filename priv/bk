@@ -1,0 +1,14 @@
+#!/bin/bash
+
+bk=`dirname $0`/bk.escript
+editor=vim
+
+$bk $*
+result=$?
+
+if [ -n "$2" ]; then exit 0; fi
+
+if [[ ("$1" = "sample" || "$1" = "merge") && $result -eq 1 ]]
+	then $editor `$bk groups file`; exit 0; fi
+
+if [ "$1" = "sample" ]; then $editor `bk sample file`; fi
