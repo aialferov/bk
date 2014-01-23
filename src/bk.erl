@@ -28,7 +28,10 @@ stop() -> application:stop(?MODULE).
 
 sum() -> {Year, Month} = year_month(), sum(Year, Month).
 sum(Year) -> lists:sum([sum(Year, Month) || Month <- ?Months]).
-sum(Year, Month) -> bk_calc:sum(bk_data:read(Year, Month)).
+sum(Year, Month) when is_list(Month); is_integer(Month) ->
+	bk_calc:sum(bk_data:read(Year, Month));
+sum(Year, DayOrGroup) ->
+	lists:sum([sum(Year, Month, DayOrGroup) || Month <- ?Months]).
 sum(Year, Month, DayOrGroup) ->
 	bk_calc:sum(bk_slice:read(bk_data:read(Year, Month), DayOrGroup)).
 sum(Year, Month, Day, Group) ->
