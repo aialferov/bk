@@ -21,13 +21,12 @@
 
 exists(Year, Month) -> filelib:is_file(bk_utils:file(Year, Month)).
 
-create(Year, Month, GroupsInfo, DataTmpl) ->
-	write(Year, Month, GroupsInfo,
-		template(Year, Month, GroupsInfo), DataTmpl).
+create(Year, Month, GroupsInfo, DataTmpl) -> write(Year, Month,
+	template(Year, Month, GroupsInfo), GroupsInfo, DataTmpl).
 
 read(Year, Month) -> read_file(bk_utils:file(Year, Month)).
 
-write(Year, Month, GroupsInfo, Data, DataTmpl) ->
+write(Year, Month, Data, GroupsInfo, DataTmpl) ->
 	filelib:ensure_dir(bk_utils:dir(Year) ++ "/"),
 	file:write_file(bk_utils:file(Year, Month),
 		format(GroupsInfo, Data, DataTmpl)).

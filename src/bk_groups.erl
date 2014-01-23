@@ -9,7 +9,9 @@
 
 -export([exists/0]).
 -export([create/1]).
+
 -export([read/0]).
+-export([write/1]).
 
 -export([file/0]).
 
@@ -17,6 +19,9 @@
 
 exists() -> filelib:is_file(?GroupsFile).
 create(Header) -> file:write_file(?GroupsFile, io_lib:format(Header, [])).
+
 read() -> bk_utils:read_file(?GroupsFile).
+write(GroupNames) -> file:write_file(?GroupsFile, io_lib:format(
+	lists:flatten(["~ts~n" || _ <- GroupNames]), GroupNames)).
 
 file() -> ?GroupsFile.

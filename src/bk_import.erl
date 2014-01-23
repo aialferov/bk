@@ -10,10 +10,10 @@ tabtxt(FileName) -> read(bk_utils:read_file(FileName, ?CRLF)).
 
 read(Content) ->
 	GroupNames = read_group_names(hd(Content)),
-	[{Day, [{lists:nth(GroupNum, GroupNames), Items} ||
+	{GroupNames, [{Day, [{lists:nth(GroupNum, GroupNames), Items} ||
 		{GroupNum, Items} <- Groups]} ||
 		{Day, Groups} <- read_data(tl(Content))
-	].
+	]}.
 
 read_group_names(?BOM ++ [H|T]) -> read_group_names(T, [], [H]).
 read_group_names([$",H|T], Names, []) -> read_group_names(T, Names, [H]);

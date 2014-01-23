@@ -56,7 +56,7 @@ merge(Year, Month) -> merge(Year, Month, bk_groups:read(),
 
 merge(_Year, _Month, [], _DataTmpl) -> {error, groups_not_found}; 
 merge(Year, Month, GroupNames, DataTmpl) -> if_sample(fun() -> data_merge(
-	Year, Month, groups_info(GroupNames), bk_sample:read(), DataTmpl) end).
+	Year, Month, bk_sample:read(), groups_info(GroupNames), DataTmpl) end).
 
 groups_create() -> bk_groups:create(bk_config:read([groups_header])).
 
@@ -72,27 +72,33 @@ sample_file() -> bk_sample:file().
 months() -> ?Months.
 message(Type) -> ?Message(Type).
 
-import(Type, Dir, Years) ->
-	GroupsInfo = groups_info(), 
+import(Type, Path, Years) when is_atom(Type) ->
+	Import = [{Year, Month, import(Type, Path, Year, Month)} ||
+		Year <- Years, Month <- ?Months],
+	{ImportData, ImportGroupNames} = lists:foldr(fun
+		({Year, Month, {GroupNames, Data}}, {AccYmd, AccGn}) ->
+			{[{Year, Month, Data}|AccYmd], GroupNames ++ AccGn}
+	end, {[], []}, Import),
+	GroupNames = sets:to_list(sets:from_list(ImportGroupNames)),
+	GroupsInfo = groups_info(GroupNames),
 	DataTmpl = bk_config:read([header, day_tmpl, group_tmpl, item_tmpl]),
-	[import(Type, Dir, Year, Month, GroupsInfo, DataTmpl) ||
-		Year <- Years, Month <- ?Months].
+	bk_groups:write(GroupNames),
+	[import(Year, Month, Data, GroupsInfo, DataTmpl) ||
+		{Year, Month, Data} <- ImportData].
 
-import(Type, Dir, Year, Month, GroupsInfo, DataTmpl) ->
-	data_merge(Year, Month, GroupsInfo,
-		import(Type, Dir, Year, Month, GroupsInfo), DataTmpl).
-
-import(tabtxt, Dir, Year, Month, GroupsInfo) ->
-	[{Day, [{group(GroupName, GroupsInfo), Items} ||
+import(Year, Month, Data, GroupsInfo, DataTmpl) ->
+	data_merge(Year, Month, [{Day, [{group(GroupName, GroupsInfo), Items} ||
 		{GroupName, Items} <- Groups]} ||
-		{Day, Groups} <- bk_import:tabtxt(filename:join([Dir, Year, Month])),
-		Day =< bk_utils:last_month_day(Year, Month)
-	].
+		{Day, Groups} <- Data, Day =< bk_utils:last_month_day(Year, Month)
+	], GroupsInfo, DataTmpl).
 
-data_merge(Year, Month, GroupsInfo, Data, DataTmpl) ->
+import(Type, Path, Year, Month) ->
+	bk_import:Type(filename:join([Path, Year, Month])).
+
+data_merge(Year, Month, Data, GroupsInfo, DataTmpl) ->
 	data_ensure(Year, Month, GroupsInfo, DataTmpl),
-	bk_data:write(Year, Month, GroupsInfo,
-		bk_data:merge(bk_data:read(Year, Month), Data), DataTmpl).
+	bk_data:write(Year, Month, bk_data:merge(bk_data:read(Year, Month), Data),
+		GroupsInfo, DataTmpl).
 
 data_ensure(Year, Month, GroupsInfo, DataTmpl) ->
 	case bk_data:exists(Year, Month) of
