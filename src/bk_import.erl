@@ -8,6 +8,7 @@
 
 tabtxt(FileName) -> read(bk_utils:read_file(FileName, ?CRLF)).
 
+read([]) -> {[], []};
 read(Content) ->
 	GroupNames = read_group_names(hd(Content)),
 	{GroupNames, [{Day, [{lists:nth(GroupNum, GroupNames), Items} ||

@@ -13,7 +13,7 @@
 -export([sample_create/0, sample_remove/0, sample_sum/0]).
 -export([merge/0, merge/2]).
 
--export([groups_create/0, groups_info/0]).
+-export([groups_create/0, groups_info/0, group_add/1]).
 -export([groups_file/0, sample_file/0]).
 
 -export([months/0]).
@@ -95,6 +95,7 @@ import(Year, Month, Data, GroupsInfo, DataTmpl) ->
 import(Type, Path, Year, Month) ->
 	bk_import:Type(filename:join([Path, Year, Month])).
 
+data_merge(_Year, _Month, [], _GroupsInfo, _DataTmpl) -> ok;
 data_merge(Year, Month, Data, GroupsInfo, DataTmpl) ->
 	data_ensure(Year, Month, GroupsInfo, DataTmpl),
 	bk_data:write(Year, Month, bk_data:merge(bk_data:read(Year, Month), Data),
