@@ -13,7 +13,7 @@
 -export([sample_create/0, sample_remove/0, sample_sum/0]).
 -export([merge/0, merge/2]).
 
--export([groups_create/0, groups_info/0, group_add/1]).
+-export([groups_create/0, groups_info/0]).
 -export([groups_file/0, sample_file/0]).
 
 -export([months/0]).
