@@ -1,5 +1,5 @@
 #!/usr/bin/escript
-%%! -smp enable -pa ebin
+%%! -smp enable -pa /usr/local/lib/bk/ebin ebin
 
 main(["sum"]) -> sum([]);
 main(["sum", Year]) -> sum([Year]);
