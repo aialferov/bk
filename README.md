@@ -7,7 +7,6 @@ Run bk without any options to see usage.
 
 1. make
 2. make install
-3. add /usr/local/lib/bk to the $ERL_LIBS
 
 ## Import from Excel
 
