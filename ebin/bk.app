@@ -12,8 +12,8 @@
 		bk_data,
 		bk_meta,
 		bk_test,
-		bk_utils
 		bk_slice,
+		bk_utils,
 		bk_config,
 		bk_groups,
 		bk_import,
