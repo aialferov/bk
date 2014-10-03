@@ -11,7 +11,7 @@
 -export([eval/1]).
 -export([flatten/1, merge/2]).
 -export([dir/1, file/2]).
--export([last_month_day/2]).
+-export([years/0, months/0, last_month_day/2]).
 
 -include("bk_config.hrl").
 
@@ -57,6 +57,14 @@ file(Year, Month) when is_integer(Month) ->
 file(Year, Month) ->
 	true = lists:member(Month, ?Months),
 	filename:join(dir(Year), Month).
+
+years() -> years(file:list_dir(?DataPath)).
+years({ok, Files}) -> lists:sort([Year || Year <- Files,
+	filelib:is_dir(Year) andalso is_year(Year)]).
+
+is_year(Year) -> re:run(Year, ?YearRx, [{capture, none}]) == match.
+
+months() -> ?Months.
 
 last_month_day(Year, Month) when is_list(Year) ->
 	last_month_day(list_to_integer(Year), Month);

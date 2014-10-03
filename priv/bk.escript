@@ -1,16 +1,8 @@
-#!/usr/bin/escript
+#!/usr/bin/env escript
 %%! -smp enable -pa /usr/local/lib/bk/ebin ebin
 
-main(["sum"]) -> sum([]);
-main(["sum", Year]) -> sum([Year]);
-main(["sum", Year, "d" ++ Day]) when Day /= "ec" -> sum([Year, {day, Day}]);
-main(["sum", Year, Group = "g" ++ _]) -> sum([Year, {group, Group}]);
-main(["sum", Year, Month]) -> sum([Year, Month]);
-main(["sum", Year, Month, "d" ++ Day]) -> sum([Year, Month, {day, Day}]);
-main(["sum", Year, Month, Group = "g" ++ _]) ->
-	sum([Year, Month, {group, Group}]);
-main(["sum", Year, Month, "d" ++ Day, Group = "g" ++ _]) ->
-	sum([Year, Month, {day, Day}, {group, Group}]);
+main(["sum"]) -> message(sum, bk:sum());
+main(["sum"|Args]) -> message(sum, bk:sum(bk_args:read(Args)));
 
 main(["sample"]) -> sample(bk:sample_create());
 main(["sample", "sum"]) -> message(sum, bk:sample_sum());
@@ -30,8 +22,6 @@ main(["import", Dir]) ->
 		filelib:is_dir(filename:join(Dir, Year))]);
 
 main(_) -> message(usage).
-
-sum(Args) -> message(sum, apply(bk, sum, Args)).
 
 sample(ok) -> ok;
 sample({error, already_exists}) -> ok;

@@ -13,6 +13,8 @@
 
 -define(DataPath, ".").
 
+-define(YearRx, "[0-9]{4}").
+
 -define(Months, [
 	"jan", "feb", "mar", "apr", "may", "jun",
 	"jul", "aug", "sep", "oct", "nov", "dec"

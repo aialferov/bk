@@ -6,15 +6,22 @@
 %%%-------------------------------------------------------------------
 
 -module(bk_slice).
--export([read/2, read/3]).
+-export([read/2]).
 
-read(Data, {day, Day}) when is_list(Day) ->
-	read(Data, {day, list_to_integer(Day)});
-read(Data, {day, Day}) -> [X || X = {DataDay, _} <- Data, DataDay == Day];
-read(Data, {group, Group}) when is_list(Group) ->
-	read(Data, {group, list_to_atom(Group)});
-read(Data, {group, Group}) ->
-	[{Day, [X || X = {DataGroup, _} <- Groups, DataGroup == Group]} ||
-		{Day, Groups} <- Data].
-read(Data, {day, Day}, {group, Group}) ->
-	read(read(Data, {day, Day}), {group, Group}).
+read(Data, Args) -> lists:foldl(fun({ReadKey, Process, FilterKey}, NewData) ->
+	filter(FilterKey, NewData, Process(proplists:get_all_values(ReadKey, Args)))
+end, Data, rules()).
+
+rules() -> [
+	{day, fun(Days) -> [list_to_integer(Day) || Day <- Days] end, days},
+	{group, fun(Groups) -> [list_to_atom(Group) || Group <- Groups] end, groups}
+].
+
+filter(days, Data, Days) -> [
+	X || X = {Day, _} <- Data,
+	Days == [] orelse lists:member(Day, Days)
+];
+filter(groups, Data, Groups) -> [{Day, [
+	X || X = {Group, _} <- DataGroups,
+	Groups == [] orelse lists:member(Group, Groups)
+]} || {Day, DataGroups} <- Data].

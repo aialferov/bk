@@ -9,14 +9,14 @@
 
 -export([start/0, stop/0]).
 
--export([sum/0, sum/1, sum/2, sum/3, sum/4]).
+-export([sum/0, sum/1]).
 -export([sample_create/0, sample_remove/0, sample_sum/0]).
 -export([merge/0, merge/2]).
 
 -export([groups_create/0, groups_info/0]).
 -export([groups_file/0, sample_file/0]).
 
--export([months/0]).
+-export([years/0, months/0]).
 -export([message/1]).
 
 -export([import/3]).
@@ -26,16 +26,12 @@
 start() -> application:start(?MODULE).
 stop() -> application:stop(?MODULE).
 
-sum() -> {Year, Month} = year_month(), sum(Year, Month).
-sum(Year) -> lists:sum([sum(Year, Month) || Month <- ?Months]).
-sum(Year, Month) when is_list(Month); is_integer(Month) ->
-	bk_calc:sum(bk_data:read(Year, Month));
-sum(Year, DayOrGroup) ->
-	lists:sum([sum(Year, Month, DayOrGroup) || Month <- ?Months]).
-sum(Year, Month, DayOrGroup) ->
-	bk_calc:sum(bk_slice:read(bk_data:read(Year, Month), DayOrGroup)).
-sum(Year, Month, Day, Group) ->
-	bk_calc:sum(bk_slice:read(bk_data:read(Year, Month), Day, Group)).
+sum() -> sum(lists:zip([year, month], tuple_to_list(year_month()))).
+sum(Args) -> lists:sum([
+	bk_calc:sum(bk_slice:read(bk_data:read(Year, Month), Args)) ||
+	Year <- proplists:get_all_values(year, Args),
+	Month <- proplists:get_all_values(month, Args)
+]).
 
 sample_create() -> sample_create(day()).
 sample_create(Day) -> sample_create(Day, bk_groups:read(),
@@ -69,12 +65,14 @@ end.
 groups_file() -> bk_groups:file().
 sample_file() -> bk_sample:file().
 
-months() -> ?Months.
+years() -> bk_utils:years().
+months() -> bk_utils:months().
+
 message(Type) -> ?Message(Type).
 
 import(Type, Path, Years) when is_atom(Type) ->
 	Import = [{Year, Month, import(Type, Path, Year, Month)} ||
-		Year <- Years, Month <- ?Months],
+		Year <- Years, Month <- bk_utils:months()],
 	{ImportData, ImportGroupNames} = lists:foldr(fun
 		({Year, Month, {GroupNames, Data}}, {AccYmd, AccGn}) ->
 			{[{Year, Month, Data}|AccYmd], GroupNames ++ AccGn}
