@@ -38,10 +38,10 @@ sample_create(Day) -> sample_create(Day, bk_groups:read(),
 	bk_config:read([sample_header, sample_day_tmpl, sample_group_tmpl])).
 
 sample_create(_Day, [], _SampleTmpl) -> {error, groups_not_found};
-sample_create(Day, GroupNames, SampleTmpl) -> case bk_sample:exists() of
-	true -> {error, already_exists};
-	false -> bk_sample:create(Day, groups_info(GroupNames), SampleTmpl)
-end.
+sample_create(Day, GroupNames, SampleTmpl) ->
+	SampleCreate = fun() -> bk_sample:create(
+		Day, groups_info(GroupNames), SampleTmpl) end,
+	if_(bk_sample:exists(), {error, already_exists}, SampleCreate).
 
 sample_remove() -> bk_sample:remove().
 sample_sum() -> if_sample(fun() -> bk_calc:sum(bk_sample:read()) end).
@@ -100,13 +100,10 @@ data_merge(Year, Month, Data, GroupsInfo, DataTmpl) ->
 		GroupsInfo, DataTmpl).
 
 data_ensure(Year, Month, GroupsInfo, DataTmpl) ->
-	case bk_data:exists(Year, Month) of
-		true -> ok;
-		false -> bk_data:create(Year, Month, GroupsInfo, DataTmpl)
-	end.
+	DataCreate = fun() -> bk_data:create(Year, Month, GroupsInfo, DataTmpl) end,
+	if_(bk_data:exists(Year, Month), ok, DataCreate).
 
-if_sample(Fun) -> case bk_sample:exists() of
-	true -> Fun(); false -> {error, sample_not_found} end.
+if_sample(Fun) -> if_(bk_sample:exists(), Fun, {error, sample_not_found}).
 
 day() -> {{_, _, Day}, {_, _, _}} = calendar:local_time(), Day.
 year_month() ->
@@ -114,3 +111,6 @@ year_month() ->
 
 group(GroupName, GroupsInfo) ->
 	{Group, GroupName} = lists:keyfind(GroupName, 2, GroupsInfo), Group.
+
+if_(true, Then, _Else) -> if is_function(Then) -> Then(); true -> Then end;
+if_(false, _Then, Else) -> if is_function(Else) -> Else(); true -> Else end.
