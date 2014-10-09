@@ -12,6 +12,7 @@
 -export([read/2, write/5]).
 
 -export([merge/2]).
+-export([tag/3]).
 
 -include("bk_config.hrl").
 
@@ -32,6 +33,11 @@ write(Year, Month, Data, GroupsInfo, DataTmpl) ->
 		format(GroupsInfo, Data, DataTmpl)).
 
 merge(Data, Sample) -> merge(Data, Sample, ?DataDepth).
+
+tag(Data, [], _TagFormat) -> Data;
+tag(Data, Tag, TagFormat) -> [{Day, [{Group, [
+	{tag_name(Name, Tag, TagFormat), Price} || {Name, Price} <- Items
+]} || {Group, Items} <- Groups]} || {Day, Groups} <- Data].
 
 format(GroupsInfo, Data, {Header, DayTmpl, GroupTmpl, ItemTmpl}) ->
 	io_lib:format(
@@ -59,6 +65,9 @@ merge(Data, Sample, Depth) -> lists:foldl(fun
 		lists:keyreplace(DataKey, 1, OldData,
 			{DataKey, merge(DataList, SampleList, Depth - 1)})
 end, Data, Sample).
+
+tag_name(Name, Tag, TagFormat) ->
+	lists:flatten(io_lib:format(TagFormat, [Name, Tag])).
 
 commas([]) -> "";
 commas(L) -> lists:duplicate(length(L) - 1, ", ") ++ [" "].

@@ -10,6 +10,9 @@ main(["sample", "sum"]) -> message(sum, bk:sample_sum());
 main(["merge"]) -> merge(bk:merge());
 main(["merge", Year, Month]) -> merge(bk:merge(Year, Month));
 
+main(["merge", Tag]) -> merge(bk:merge(Tag));
+main(["merge", Tag, Year, Month]) -> merge(bk:merge(Tag, Year, Month));
+
 main(["groups"]) -> message(groups, bk:groups_info());
 main(["months"]) -> message(months, bk:months());
 

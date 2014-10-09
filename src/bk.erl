@@ -11,7 +11,7 @@
 
 -export([sum/0, sum/1]).
 -export([sample_create/0, sample_remove/0, sample_sum/0]).
--export([merge/0, merge/2]).
+-export([merge/0, merge/1, merge/2, merge/3]).
 
 -export([groups_create/0, groups_info/0]).
 -export([groups_file/0, sample_file/0]).
@@ -46,13 +46,18 @@ sample_create(Day, GroupNames, SampleTmpl) ->
 sample_remove() -> bk_sample:remove().
 sample_sum() -> if_sample(fun() -> bk_calc:sum(bk_sample:read()) end).
 
-merge() -> {Year, Month} = year_month(), merge(Year, Month).
-merge(Year, Month) -> merge(Year, Month, bk_groups:read(),
+merge() -> merge([]).
+merge(Year, Month) -> merge([], Year, Month).
+
+merge(Tag) -> {Year, Month} = year_month(), merge(Tag, Year, Month).
+merge(Tag, Year, Month) -> merge(Tag, Year, Month, bk_groups:read(),
 	bk_config:read([header, day_tmpl, group_tmpl, item_tmpl])).
 
-merge(_Year, _Month, [], _DataTmpl) -> {error, groups_not_found}; 
-merge(Year, Month, GroupNames, DataTmpl) -> if_sample(fun() -> data_merge(
-	Year, Month, bk_sample:read(), groups_info(GroupNames), DataTmpl) end).
+merge(_Tag, _Year, _Month, [], _DataTmpl) -> {error, groups_not_found}; 
+merge(Tag, Year, Month, GroupNames, DataTmpl) -> if_sample(fun() -> data_merge(
+	Year, Month, data_tag(bk_sample:read(), Tag),
+	groups_info(GroupNames), DataTmpl
+) end).
 
 groups_create() -> bk_groups:create(bk_config:read([groups_header])).
 
@@ -102,6 +107,8 @@ data_merge(Year, Month, Data, GroupsInfo, DataTmpl) ->
 data_ensure(Year, Month, GroupsInfo, DataTmpl) ->
 	DataCreate = fun() -> bk_data:create(Year, Month, GroupsInfo, DataTmpl) end,
 	if_(bk_data:exists(Year, Month), ok, DataCreate).
+
+data_tag(Data, Tag) -> bk_data:tag(Data, Tag, bk_config:read([tag_format])).
 
 if_sample(Fun) -> if_(bk_sample:exists(), Fun, {error, sample_not_found}).
 
